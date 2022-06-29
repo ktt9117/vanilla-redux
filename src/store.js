@@ -1,39 +1,23 @@
-import { createStore } from "redux";
+import { configureStore, createAction, createReducer } from "@reduxjs/toolkit";
 
-const ADD = "ADD";
-const DELETE = "DELETE";
+const ADD_TODO = createAction("ADD");
+const DELETE_TODO = createAction("DELETE");
 
-const ADD_TODO = (text) => {
-  return {
-    type: ADD,
-    text,
-  };
-};
-
-const DELETE_TODO = (id) => {
-  return {
-    type: DELETE,
-    id: parseInt(id),
-  };
-};
-
-const reducer = (state = JSON.parse(window.localStorage.getItem("todos")) || [], action) => {
-  switch (action.type) {
-    case ADD:
-      return save([{ text: action.text, id: Date.now() }, ...state]);
-    case DELETE:
-      return save(state.filter((todo) => todo.id !== parseInt(action.id)));
-    default:
-      return state;
-  }
-};
+const reducer = createReducer(JSON.parse(window.localStorage.getItem("todos")) || [], {
+  [ADD_TODO]: (state, action) => {
+    return save([{ text: action.payload, id: Date.now() }, ...state]);
+  },
+  [DELETE_TODO]: (state, action) => {
+    return save(state.filter((todo) => todo.id !== parseInt(action.payload)));
+  },
+});
 
 const save = (state) => {
   window.localStorage.setItem("todos", JSON.stringify(state));
   return state;
 };
 
-const store = createStore(reducer);
+const store = configureStore({ reducer });
 
 export default store;
 
